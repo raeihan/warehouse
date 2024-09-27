@@ -40,7 +40,7 @@ const Sidebar = () => {
       <aside
         className={`${
           isOpen ? "block" : "hidden"
-        } md:block md:w-1/5 w-full bg-yellow-200 text-white h-full md:h-auto fixed md:relative z-50`}
+        } md:block md:w-1/5 w-full bg-yellow-200 text-white md:h-auto fixed md:relative z-50 h-full min-h-screen`}
       >
         <div className="h-20 shadow-lg flex justify-center items-center">
         <button
