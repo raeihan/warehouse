@@ -10,7 +10,7 @@ const Dashboard = () => {
   const [product, setProduct] = useState(0);
   const [jenisBarangCount, setJenisBarangCount] = useState({});
   const [loadingSkeleton, setLoadingSkeleton] = useState(true);
-
+  
   const totalBarang = async () => {
     setLoadingSkeleton(true);
     try {

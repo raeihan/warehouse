@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { supabase } from "../../utils/SupaClient";
 import { useParams, useNavigate } from "react-router-dom";
+import { Spinner } from "@nextui-org/react";
 
 const ItemDetail = () => {
   const [getBarangById, setGetBarangById] = useState(null);
@@ -34,7 +35,14 @@ const ItemDetail = () => {
   }, [id]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <Layout>
+        <div className="flex justify-center items-center h-full gap-4">
+          <Spinner color="warning" />
+          <p className="text-white flex flex-col">Wait a Second</p>
+        </div>
+      </Layout>
+    );
   }
 
   if (!getBarangById) {
@@ -84,7 +92,9 @@ const ItemDetail = () => {
               <button
                 onClick={() => navigate("/table")}
                 className="mt-4 px-4 py-2 bg-green-700 text-yellow-200 rounded hover:bg-green-800 transition-all duration-300"
-              >Back</button>
+              >
+                Back
+              </button>
             </div>
           </div>
         </div>

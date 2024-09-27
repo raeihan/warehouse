@@ -37,7 +37,6 @@ const Supplier = () => {
   
     return (
       <Layout>
-
         <section id="table-barang" className="p-8">
           <div className="flex justify-between mb-5">
             <Button color="warning" variant="ghost" onPress={onOpen}>
