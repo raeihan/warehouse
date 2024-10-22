@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Table,
   TableHeader,
@@ -9,6 +9,7 @@ import {
   Pagination,
   getKeyValue,
   Tooltip,
+  Button,
 } from "@nextui-org/react";
 import { EyeIcon } from "./icons/EyeIcon";
 import { EditIcon } from "./icons/EditIcon";
@@ -18,6 +19,7 @@ import useTruncateText from "../hooks/useTruncateText";
 import { Link } from "react-router-dom";
 import { supabase } from "../utils/SupaClient";
 import Swal from "sweetalert2";
+import { useAuth } from "../auth/AuthProvider";
 
 const columns = [
   {
@@ -50,18 +52,24 @@ const columns = [
   },
 ];
 
-export default function ColumnEdit({ allBarang }) {
+export default function ColumnEdit({ allBarang, search }) {
   const [page, setPage] = React.useState(1);
   const rowsPerPage = 3;
 
-  const pages = Math.ceil(allBarang.length / rowsPerPage);
+  const filterdItem = useMemo(() => {
+    return allBarang.filter((product) =>
+      product.product_name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [allBarang, search]);
+
+  const pages = Math.ceil(filterdItem.length / rowsPerPage);
 
   const items = React.useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    return allBarang.slice(start, end);
-  }, [page, allBarang]);
+    return filterdItem.slice(start, end);
+  }, [page, filterdItem]);
 
   const { formatRupiah } = useFormatRupiah();
 
@@ -79,17 +87,28 @@ export default function ColumnEdit({ allBarang }) {
         confirmButtonText: "Yes, delete it!",
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const { data } = await supabase
-            .from("product")
-            .delete()
-            .eq("id", id)
-            .select();
-          if (data) {
-            Swal.fire({
-              title: "Deleted!",
-              text: "Your file has been deleted.",
-              icon: "success",
-            }).then(() => window.location.reload())
+          const removeUrlImage = String(getImageById.product).replace(
+            "https://jhusxvxjjuvpexotajto.supabase.co/storage/v1/object/public/imageProduct/product/",
+            ""
+          );
+          if (getImageById) {
+            const { data: removeImage } = await supabase.storage
+              .from("image")
+              .remove([`product/${removeUrlImage}`]);
+            if (removeImage) {
+              const { data } = await supabase
+                .from("product")
+                .delete()
+                .eq("id", id)
+                .select();
+              if (data) {
+                Swal.fire({
+                  title: "Deleted!",
+                  text: "Your file has been deleted.",
+                  icon: "success",
+                }).then(() => window.location.reload());
+              }
+            }
           }
         }
       });
@@ -97,6 +116,8 @@ export default function ColumnEdit({ allBarang }) {
       console.log(error);
     }
   };
+
+  const { user, role } = useAuth();
 
   return (
     <Table
@@ -136,28 +157,36 @@ export default function ColumnEdit({ allBarang }) {
                   />
                 ) : columnKey === "action" ? (
                   <div className="relative flex items-center gap-5 p-2">
-                    <Link to={`/detail/${item.id}`}>
-                      <Tooltip content="Detail Barang">
-                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                          <EyeIcon />
-                        </span>
-                      </Tooltip>
-                    </Link>
-                    <Link to={`/item/${item.id}`}>
-                      <Tooltip content="Edit Barang">
-                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                          <EditIcon />
-                        </span>
-                      </Tooltip>
-                    </Link>
-                    <Tooltip color="danger" content="Hapus Barang">
-                      <span
-                        className="text-lg text-danger cursor-pointer active:opacity-50"
-                        onClick={() => deleteProductById(item.id)}
-                      >
-                        <DeleteIcon />
-                      </span>
-                    </Tooltip>
+                    {user && role === "admin" ? (
+                      <>
+                        <Link to={`/detail/${item.id}`}>
+                          <Tooltip content="Detail Barang">
+                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                              <EyeIcon />
+                            </span>
+                          </Tooltip>
+                        </Link>
+                        <Link to={`/item/${item.id}`}>
+                          <Tooltip content="Edit Barang">
+                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                              <EditIcon />
+                            </span>
+                          </Tooltip>
+                        </Link>
+                        <Tooltip color="danger" content="Hapus Barang">
+                          <span
+                            className="text-lg text-danger cursor-pointer active:opacity-50"
+                            onClick={() => deleteProductById(item.id)}
+                          >
+                            <DeleteIcon />
+                          </span>
+                        </Tooltip>
+                      </>
+                    ) : (
+                      <Link to={`/detail/${item.id}`}>
+                        <Button color="primary">Detail Barang</Button>
+                      </Link>
+                    )}
                   </div>
                 ) : columnKey === "price" ? (
                   formatRupiah(getKeyValue(item, columnKey))

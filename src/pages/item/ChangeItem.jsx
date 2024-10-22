@@ -17,6 +17,8 @@ const ChangeItem = () => {
     image: "",
   });
 
+  const [imagePreview, setImgPreview] = useState("");
+
   const [loading, setLoading] = useState(true);
 
   const [loadingBtn, setLoadingBtn] = useState(false);
@@ -60,9 +62,43 @@ const ChangeItem = () => {
         .select();
       if (data) {
         Swal.fire({
-          title: "Succes",
+          title: "Change Success",
           icon: "success",
         }).then(() => navigate("/table"));
+      } else {
+        const { data: deleteImg } = await supabase.storage
+        .from("imageProduct")
+        .remove(`product/${formEdit.product}`)
+        if (deleteImg) {
+          const { data: uploadImage} = await supabase.storage
+          .from("imageProduct")
+          .upload(`product/${imagePreview.name}`, imagePreview, {
+            cacheControl: 3600,
+            upsert: true
+          })
+          if(uploadImage) {
+            const {data} = await supabase.from("product").update({
+              ...formEdit,
+              product: imagePreview
+            })
+            .eq("id", id)
+            .select("*")
+            if (data) {
+              alert("Image and Data Changes Successful")
+              navigate("/table")
+            } else {
+              alert("Image and Data Failed Changes")
+            }
+          } else {
+            const removeUrlImage = formEdit.product.replace(
+              "https://jhusxvxjjuvpexotajto.supabase.co/storage/v1/object/public/imageProduct/product/",
+              ""
+            )
+            const {data: deleteImg} = await supabase.storage
+            .from("imageProduct")
+            .remove ([`product/${removeUrlImage}`])
+          }
+        }
       }
     } catch (error) {
       console.log(error);
@@ -70,6 +106,38 @@ const ChangeItem = () => {
       setLoadingBtn(false);
     }
   };
+
+  const updateBarangById = async (e) => {
+    e.preventDefault();
+
+    setLoadingBtn(true);
+
+    try {
+      if (imagePreview.length === 0) {
+        const { data: updateData } = await supabase
+          .from("product")
+          .update(formEdit)
+          .eq("id", id)
+          .select();
+        if(updateData) {
+          alert("Updated Success")
+          navigate("/table")
+        } else {
+          alert("Update Canceled")
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingBtn(false);
+    }
+  };
+
+  const handleImg = (e) => {
+    setImgPreview(e.target.files[0]);
+    console.log(e.target.files[0]);
+  };
+
   useEffect(() => {
     getProductById();
     const titleElement = document.getElementById("title");
@@ -77,7 +145,7 @@ const ChangeItem = () => {
       titleElement.innerHTML = "Edit Product Page";
     }
   }, []);
-  
+
   return (
     <Layout>
       {loading ? (
@@ -144,12 +212,17 @@ const ChangeItem = () => {
               <h3 className="text-white py-1">Image</h3>
               <input
                 name="image"
-                type="text"
+                type="file"
                 className="form-input rounded-md w-full px-2"
-                value={formEdit.image}
                 onChange={handleChange}
               />
             </label>
+            <img
+              src={formEdit.image}
+              alt={formEdit.product_name}
+              className="size-4"
+            />
+
             <div className="text-white py-3 flex gap-4">
               <Button onClick={() => navigate("/table")} color="danger">
                 Back

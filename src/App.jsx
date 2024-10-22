@@ -9,22 +9,29 @@ import Supplier from "./pages/Supplier";
 import ChangeSupplier from "./pages/item/ChangeSupplier";
 import SupplierDetail from "./pages/item/SupplierDetail";
 import AllProduct from "./pages/AllProduct";
-
+import Login from "./auth/Login";
+import AuthAdmin from "./auth/AuthAdmin";
 
 const App = () => {
-  
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/table" element={<TableBarang/>} />
-        <Route path="/supplier" element={<Supplier/>} />
-        <Route path="/allproduct" element={<AllProduct/>} />
-        <Route path="/detail/:id" element={<ItemDetail/>} />
-        <Route path="/detailsupplier/:id" element={<SupplierDetail/>} />
-        <Route path="/add-items" element={<AddItems />} />
-        <Route path="/item/:id" element={<ChangeItem />} />
+        <Route path="/table" element={<TableBarang />} />
+
+        <Route path="/supplier" element={<Supplier />} />
+        <Route path="/allproduct" element={<AllProduct />} />
+        <Route path="/detail/:id" element={<ItemDetail />} />
+        <Route path="/detailsupplier/:id" element={<SupplierDetail />} />
         <Route path="/supplier/:id" element={<ChangeSupplier />} />
+
+        <Route element={<AuthAdmin />}>
+          <Route path="/edit/:id" element={<ChangeItem />} />
+          <Route path="/item/:id" element={<ChangeItem />} />
+          <Route path="/add-items" element={<AddItems />} />
+        </Route>
+
+        <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );

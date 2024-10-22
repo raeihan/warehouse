@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../auth/AuthProvider";
 
 const Sidebar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { role } = useAuth();
   return (
     <>
       <button
@@ -43,7 +45,7 @@ const Sidebar = () => {
         } md:block md:w-1/5 w-full bg-yellow-200 text-white md:h-auto fixed md:relative z-50 h-full min-h-screen`}
       >
         <div className="h-20 shadow-lg flex justify-center items-center">
-        <button
+          <button
             onClick={() => setIsOpen(false)}
             className="md:hidden text-green-700 max-md:mr-5"
           >
@@ -72,7 +74,6 @@ const Sidebar = () => {
             </svg>{" "}
             Lieblingslogistik
           </h2>
-          
         </div>
 
         <nav className="flex justify-center pt-10">
@@ -93,6 +94,7 @@ const Sidebar = () => {
                 Dashboard
               </LinkSideBar>
             </li>
+
             <li>
               <LinkSideBar link={"/table"}>
                 <svg
@@ -109,6 +111,7 @@ const Sidebar = () => {
                 Item Table
               </LinkSideBar>
             </li>
+
             <li>
               <LinkSideBar link={"/allproduct"}>
                 <svg

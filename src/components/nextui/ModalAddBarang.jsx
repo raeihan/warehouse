@@ -31,21 +31,64 @@ export default function ModalAddBarang({ isOpen, onOpen, onOpenChange }) {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // try {
+    //   const { data, error } = await supabase
+    //     .from("product")
+    //     .insert(formData)
+    //     .select();
+    //   if (data) {
+    //     Swal.fire({
+    //       title: "Add Succesfully",
+    //       icon: "success",
+    //     }).then(() => {
+    //       window.location.reload();
+    //     });
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
     try {
-      const { data, error } = await supabase
-        .from("product")
-        .insert(formData)
-        .select();
-      if (data) {
-        Swal.fire({
-          title: "Add Succesfully",
-          icon: "success",
-        }).then(() => {
-          window.location.reload();
+      const { data: uploadImage, error: uploadError } = await supabase.storage
+        .from("imageProduct")
+        .upload(`product/${formData.image.name}`, formData.image, {
+          cacheControl: "3600",
+          upsert: true,
         });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+      if (uploadImage) {
+        const imageUrl = supabase.storage
+          .from("imageProduct")
+          .getPublicUrl(`product/${formData.image.name}`).data.publicUrl;
+        const updatedFormData = {
+          ...formData,
+          image: imageUrl,
+        };
+
+        const { data, error } = await supabase.from("product").insert(updatedFormData).select()
+
+        if (error) {
+          throw error;
+        }
+        if (data) {
+          Swal.fire({
+            title: "Input Success",
+            text: "Data success to input",
+            icon: "success",
+          }).then(() => {
+            window.location.reload();
+          });
+        }
       }
     } catch (error) {
       console.log(error);
+      Swal.fire({
+        title: "Error",
+        text: "Data was error to input",
+        icon: "error",
+      });
     }
   };
 
@@ -63,6 +106,13 @@ export default function ModalAddBarang({ isOpen, onOpen, onOpenChange }) {
       value: "Kosmetik",
     },
   ];
+
+  const handleImage = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.files[0],
+    });
+  };
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -135,12 +185,11 @@ export default function ModalAddBarang({ isOpen, onOpen, onOpenChange }) {
                 <label>
                   Image
                   <Input
-                    type="text"
-                    radius="sm"
+                    type="file"
                     required
                     name="image"
-                    value={formData.image}
-                    onChange={handleChange}
+                    onChange={handleImage}
+                    className="w-full border border-black p-2 rounded-md"
                   />
                 </label>
               </ModalBody>
