@@ -52,7 +52,9 @@ export default function DropdownUser() {
               <p className="font-bold">Signed in as</p>
               <p className="font-bold">{email}</p>
             </DropdownItem>
-
+            <DropdownItem>
+              <Link to={"/profile"}>Profile</Link>
+            </DropdownItem>
             <DropdownItem key="logout" color="danger" onClick={handleLogout}>
               Log Out
             </DropdownItem>

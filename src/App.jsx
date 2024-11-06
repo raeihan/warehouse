@@ -11,6 +11,7 @@ import SupplierDetail from "./pages/item/SupplierDetail";
 import AllProduct from "./pages/AllProduct";
 import Login from "./auth/Login";
 import AuthAdmin from "./auth/AuthAdmin";
+import Profile from "./pages/item/Profile";
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/edit/:id" element={<ChangeItem />} />
           <Route path="/item/:id" element={<ChangeItem />} />
           <Route path="/add-items" element={<AddItems />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         <Route path="/login" element={<Login />} />
